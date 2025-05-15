@@ -10,7 +10,9 @@ public class ActionWheelController : MonoBehaviour
 {
     [Header("UI関連")]
     public Image[] actionImages;             // アイコン画像
-    public Text[] actionTexts;               // 行動名テキスト
+    public Text currentText;
+
+    public SkillWheelController skillWheelController;
 
     [Header("データ")]
     public ActionData[] actionDataList;       // 行動データ（アイコン＋名前）
@@ -19,6 +21,7 @@ public class ActionWheelController : MonoBehaviour
     private float rotationDuration = 0.2f;    // 回転アニメ時間
 
     private Vector3[] initPos;                // 初期座標保持
+    private int currentTension;
 
     void Start()
     {
@@ -27,7 +30,6 @@ public class ActionWheelController : MonoBehaviour
         {
             initPos[i] = actionImages[i].rectTransform.anchoredPosition;
             actionImages[i].sprite = actionDataList[i].actionIcon;
-            actionTexts[i].text = actionDataList[i].actionName;
         }
         StartDisplay();
     }
@@ -91,10 +93,6 @@ public class ActionWheelController : MonoBehaviour
                 color.a = Mathf.Lerp(startAlphas[i], targetAlpha, t);
                 actionImages[i].color = color;
 
-                Color textColor = actionTexts[i].color;
-                textColor.a = Mathf.Lerp(startAlphas[i], targetAlpha, t);
-                actionTexts[i].color = textColor;
-
                 actionImages[i].transform.localScale = Vector3.Lerp(startScales[i], targetScale, t);
             }
 
@@ -118,36 +116,30 @@ public class ActionWheelController : MonoBehaviour
     {
         var lastImage = actionImages[actionImages.Length - 1];
         var lastData = actionDataList[actionDataList.Length - 1];
-        var lastText = actionTexts[actionTexts.Length - 1];
 
         for (int i = actionImages.Length - 1; i > 0; i--)
         {
             actionImages[i] = actionImages[i - 1];
             actionDataList[i] = actionDataList[i - 1];
-            actionTexts[i] = actionTexts[i - 1];
         }
 
         actionImages[0] = lastImage;
         actionDataList[0] = lastData;
-        actionTexts[0] = lastText;
     }
 
     void RotateArraysLeft()
     {
         var firstImage = actionImages[0];
         var firstData = actionDataList[0];
-        var firstText = actionTexts[0];
 
         for (int i = 0; i < actionImages.Length - 1; i++)
         {
             actionImages[i] = actionImages[i + 1];
             actionDataList[i] = actionDataList[i + 1];
-            actionTexts[i] = actionTexts[i + 1];
         }
 
         actionImages[actionImages.Length - 1] = firstImage;
         actionDataList[actionDataList.Length - 1] = firstData;
-        actionTexts[actionTexts.Length - 1] = firstText;
     }
 
     void StartDisplay()
@@ -163,7 +155,7 @@ public class ActionWheelController : MonoBehaviour
 
     void UpdateDisplay()
     {
-        // 必要なら中央に出てる行動の詳細説明とかもここで更新
+        currentText.text = actionDataList[currentIndex].actionName;
     }
 
     void UpdateImageAppearance(int i)
@@ -172,19 +164,16 @@ public class ActionWheelController : MonoBehaviour
         {
             actionImages[i].transform.localScale = new Vector3(1.5f, 1.5f, 1);
             actionImages[i].color = new Color(1f, 1f, 1f, 1.0f);
-            actionTexts[i].color = new Color(0f, 0f, 0f, 1.0f);
         }
         else if (i == (currentIndex - 1 + actionImages.Length) % actionImages.Length || i == (currentIndex + 1) % actionImages.Length)
         {
             actionImages[i].transform.localScale = Vector3.one;
             actionImages[i].color = new Color(1f, 1f, 1f, 0.5f);
-            actionTexts[i].color = new Color(0f, 0f, 0f, 0.5f);
         }
         else
         {
             actionImages[i].transform.localScale = Vector3.one;
             actionImages[i].color = new Color(1f, 1f, 1f, 0f);
-            actionTexts[i].color = new Color(0f, 0f, 0f, 0f);
         }
     }
 
@@ -198,7 +187,48 @@ public class ActionWheelController : MonoBehaviour
         var selectedAction = GetCurrentActionData();
         Debug.Log($"選択した行動: {selectedAction.actionName}");
 
-        // 選択に応じた次処理（例えば、スキルホイールを開くとか）を書く
+        switch (selectedAction.actionType)
+        {
+            case ActionType.Attack:
+                Debug.Log("通常攻撃を選択 → 対象選択へ");
+                // TODO: 対象選択UI呼び出し
+                break;
+
+            case ActionType.Skill:
+                Debug.Log("スキルを選択 → スキルホイールを表示");
+                skillWheelController.gameObject.SetActive(true);
+                this.gameObject.SetActive(false);
+                break;
+
+            case ActionType.Defend:
+                Debug.Log("防御 → 防御処理即実行");
+                // TODO: 防御処理を実行してターン終了
+                break;
+
+            case ActionType.Item:
+                Debug.Log("アイテム → アイテムホイール表示");
+                // TODO: アイテム選択画面表示
+                break;
+
+            case ActionType.Special:
+                if (IsTensionMax())
+                {
+                    Debug.Log("スペシャル発動！");
+                    // TODO: スペシャルスキル処理呼び出し
+                }
+                else
+                {
+                    Debug.Log("テンションが足りません！");
+                    // TODO: エラーUI表示など
+                }
+                break;
+        }
+
+        bool IsTensionMax()
+        {
+            // 仮に100がMAXだとする
+            return currentTension >= 100;
+        }
     }
 }
 

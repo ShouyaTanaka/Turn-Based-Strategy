@@ -220,8 +220,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 985214802b38d8140b15e5cc15b6bd3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blocked: {fileID: 21300000, guid: 8548ce3648f81d74aa524b2cebf02451, type: 3}
-  ground: {fileID: 21300000, guid: 0e7c041f3785f224593d6e761b9585de, type: 3}
+  blocked: {fileID: 21300000, guid: 469ecf28d3b801a4dafcc085b4a334f7, type: 3}
+  ground: {fileID: 21300000, guid: 387ba660102383c4fbcc662227234f13, type: 3}
   mapWidth: 18
   mapHeight: 10
 --- !u!4 &1211928551
